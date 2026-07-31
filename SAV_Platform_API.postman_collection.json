@@ -1,0 +1,1232 @@
+{
+  "info": {
+    "name": "SAV Platform API",
+    "_postman_id": "sav-platform-api-v1",
+    "description": "Collection complète pour tester l'API de la plateforme de gestion SAV.\n\n**Workflow recommandé :**\n1. Exécuter **Login (Admin)** → le token est sauvegardé automatiquement\n2. Tester les routes Admin/Tickets\n3. Exécuter **Login (Technicien)** pour les routes technicien\n4. Exécuter **Login (Client)** pour les routes client\n\n**Base URL :** `http://127.0.0.1:8000/api`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",        "value": "http://127.0.0.1:8000/api", "type": "string" },
+    { "key": "token_admin",     "value": "", "type": "string" },
+    { "key": "token_tech",      "value": "", "type": "string" },
+    { "key": "token_client",    "value": "", "type": "string" },
+    { "key": "ticket_id",       "value": "1",  "type": "string" },
+    { "key": "technicien_id",   "value": "2",  "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Authentification",
+      "description": "Inscription, connexion et déconnexion. Le token Bearer est automatiquement sauvegardé dans les variables de collection.",
+      "item": [
+
+        {
+          "name": "Register – Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_admin', json.token);",
+                  "    pm.test('Account created', () => pm.expect(json.token).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin Principal\",\n  \"email\": \"admin@sav.test\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"Admin\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
+            "description": "Crée un compte Admin. Valeurs acceptées pour `role` : `Admin`, `Technicien`, `Client`."
+          }
+        },
+
+        {
+          "name": "Register – Technicien",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_tech', json.token);",
+                  "    pm.collectionVariables.set('technicien_id', json.user.id);",
+                  "    pm.test('Technicien created', () => pm.expect(json.token).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ahmed Technicien\",\n  \"email\": \"tech@sav.test\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"Technicien\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          }
+        },
+
+        {
+          "name": "Register – Client",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_client', json.token);",
+                  "    pm.test('Client created', () => pm.expect(json.token).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sara Client\",\n  \"email\": \"client@sav.test\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"Client\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          }
+        },
+
+        {
+          "name": "Login – Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_admin', json.token);",
+                  "    pm.test('Login successful – token saved', () => pm.expect(json.token).to.be.a('string'));",
+                  "    pm.test('Role is Admin', () => pm.expect(json.user.role).to.eql('Admin'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sav.test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
+            "description": "Token sauvegardé dans `token_admin`."
+          }
+        },
+
+        {
+          "name": "Login – Technicien",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_tech', json.token);",
+                  "    pm.collectionVariables.set('technicien_id', json.user.id);",
+                  "    pm.test('Login successful – token saved', () => pm.expect(json.token).to.be.a('string'));",
+                  "    pm.test('Role is Technicien', () => pm.expect(json.user.role).to.eql('Technicien'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tech@sav.test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+
+        {
+          "name": "Login – Client",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token_client', json.token);",
+                  "    pm.test('Login successful – token saved', () => pm.expect(json.token).to.be.a('string'));",
+                  "    pm.test('Role is Client', () => pm.expect(json.user.role).to.eql('Client'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@sav.test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+
+        {
+          "name": "Get Authenticated User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has id and email', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.exist;",
+                  "    pm.expect(json.email).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/user", "host": ["{{base_url}}"], "path": ["user"] },
+            "description": "Retourne l'utilisateur actuellement authentifié. Changez le token pour tester différents rôles."
+          }
+        },
+
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Logged out message', () => {",
+                  "    pm.expect(pm.response.json().message).to.include('Logged out');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] },
+            "description": "Révoque le token courant (Sanctum)."
+          }
+        },
+
+        {
+          "name": "❌ Login – Mauvais mot de passe (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Error message exists', () => pm.expect(pm.response.json().message).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sav.test\",\n  \"password\": \"mauvais_mdp\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🎫 Tickets",
+      "description": "CRUD complet pour les tickets. Le comportement varie selon le rôle :\n- **Admin** : voit tous les tickets, peut assigner\n- **Technicien** : voit ses tickets assignés, peut changer le statut\n- **Client** : voit uniquement ses propres tickets, peut créer",
+      "item": [
+
+        {
+          "name": "GET /tickets – Admin (tous les tickets)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Data array exists', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "});",
+                  "if (pm.response.json().data.length > 0) {",
+                  "    pm.collectionVariables.set('ticket_id', pm.response.json().data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tickets?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"],
+              "query": [{ "key": "page", "value": "1" }]
+            },
+            "description": "Liste paginée (15/page). Résultats filtrés selon le rôle de l'utilisateur."
+          }
+        },
+
+        {
+          "name": "GET /tickets – Client (ses tickets)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Data array exists', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "GET /tickets – Technicien (ses tickets assignés)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "POST /tickets – Créer un ticket (Client)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Ticket has id', () => pm.expect(json.data.id).to.exist);",
+                  "pm.test('Statut is Nouveau', () => pm.expect(json.data.statut).to.eql('Nouveau'));",
+                  "pm.collectionVariables.set('ticket_id', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Imprimante réseau hors service\",\n  \"description\": \"L'imprimante du bureau 304 ne répond plus depuis ce matin. Impossible d'imprimer depuis n'importe quel poste du réseau.\",\n  \"priorite\": \"Haute\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] },
+            "description": "Seuls les **Clients** peuvent créer des tickets. L'id du ticket est sauvegardé dans `ticket_id`."
+          }
+        },
+
+        {
+          "name": "POST /tickets – Priorité Critique",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Priorite is Critique', () => pm.expect(pm.response.json().data.priorite).to.eql('Critique'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Serveur principal inaccessible\",\n  \"description\": \"Le serveur de fichiers principal est tombé. Tous les utilisateurs sont bloqués. Intervention urgente requise.\",\n  \"priorite\": \"Critique\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "❌ POST /tickets – Accès refusé (Admin tente de créer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Error message', () => pm.expect(pm.response.json().message).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Test interdit\",\n  \"description\": \"Un admin ne doit pas pouvoir créer de ticket.\",\n  \"priorite\": \"Basse\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "GET /tickets/{id} – Détail d'un ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has titre', () => pm.expect(pm.response.json().data.titre).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}"] },
+            "description": "Remplacez `{{ticket_id}}` par un ID réel ou utilisez la variable."
+          }
+        },
+
+        {
+          "name": "❌ GET /tickets/{id} – Ticket non autorisé (Client → ticket d'autrui)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 or 404', () => {",
+                  "    pm.expect([403, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/9999", "host": ["{{base_url}}"], "path": ["tickets", "9999"] },
+            "description": "Ticket inexistant ou appartenant à un autre client → 403 ou 404."
+          }
+        },
+
+        {
+          "name": "PATCH /tickets/{id}/assign – Assigner un technicien (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Statut is En cours', () => pm.expect(pm.response.json().data.statut).to.eql('En cours'));",
+                  "pm.test('Technicien assigned', () => pm.expect(pm.response.json().data.technicien).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicien_id\": {{technicien_id}}\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/assign", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "assign"] },
+            "description": "L'Admin assigne un technicien. Le statut passe automatiquement à **En cours**."
+          }
+        },
+
+        {
+          "name": "❌ PATCH /tickets/{id}/assign – Refusé (non Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicien_id\": {{technicien_id}}\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/assign", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "assign"] }
+          }
+        },
+
+        {
+          "name": "PATCH /tickets/{id}/status – Changer statut (Technicien)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Statut updated', () => {",
+                  "    const s = pm.response.json().data.statut;",
+                  "    pm.expect(['En cours', 'Résolu']).to.include(s);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"Résolu\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/status", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "status"] },
+            "description": "Valeurs acceptées pour `statut` : `En cours`, `Résolu`. Seul le technicien **assigné** peut modifier."
+          }
+        },
+
+        {
+          "name": "❌ PATCH /tickets/{id}/status – Refusé (Client tente de changer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"Résolu\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/status", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "status"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "📋 Rapports d'Intervention",
+      "description": "Les rapports sont créés par les techniciens après résolution d'un ticket. La création d'un rapport passe automatiquement le ticket en statut **Résolu**.",
+      "item": [
+
+        {
+          "name": "POST /tickets/{id}/rapport – Créer un rapport (Technicien)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Rapport has contenu', () => pm.expect(pm.response.json().data.contenu).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "contenu",
+                  "value": "Intervention effectuée le 13/06/2025. L'imprimante était déconnectée du réseau suite à une mise à jour du firmware. Remise en service après réinitialisation et reconfiguration de l'adresse IP statique. Tests d'impression validés depuis 5 postes.",
+                  "type": "text"
+                },
+                {
+                  "key": "photos",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optionnel – joindre des photos (jpeg/png/webp, max 2 Mo chacune)"
+                }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] },
+            "description": "⚠️ Utilise `multipart/form-data` (pour les photos). Sans photo, laissez le champ `photos` vide.\n\nRègles :\n- `contenu` : requis, minimum 10 caractères\n- `photos` : optionnel, tableau d'images (jpg/png/webp, max 2 Mo)"
+          }
+        },
+
+        {
+          "name": "POST /tickets/{id}/rapport – Sans photos (JSON-like)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 or 409', () => {",
+                  "    pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "contenu",
+                  "value": "Problème résolu par redémarrage du service et mise à jour du pilote.",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] },
+            "description": "409 si un rapport existe déjà pour ce ticket."
+          }
+        },
+
+        {
+          "name": "GET /tickets/{id}/rapport – Consulter le rapport",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has contenu', () => pm.expect(pm.response.json().data.contenu).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] },
+            "description": "Accessible par l'Admin, le Technicien assigné, et le Client propriétaire du ticket."
+          }
+        },
+
+        {
+          "name": "GET /tickets/{id}/rapport – Client consulte son rapport",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 403', () => {",
+                  "    pm.expect([200, 403, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] }
+          }
+        },
+
+        {
+          "name": "❌ POST /rapport – Refusé (Admin tente de créer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "contenu", "value": "Tentative non autorisée.", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "👥 Utilisateurs & Dashboard",
+      "description": "Routes réservées à l'Admin pour la gestion des utilisateurs et les statistiques globales.",
+      "item": [
+
+        {
+          "name": "GET /techniciens – Liste des techniciens (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "if (pm.response.json().length > 0) {",
+                  "    pm.collectionVariables.set('technicien_id', pm.response.json()[0].id);",
+                  "    pm.test('Each user has role Technicien', () => {",
+                  "        pm.response.json().forEach(u => pm.expect(u.role).to.eql('Technicien'));",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/techniciens", "host": ["{{base_url}}"], "path": ["techniciens"] },
+            "description": "Retourne la liste de tous les utilisateurs avec le rôle Technicien. L'ID du premier technicien est sauvegardé dans `technicien_id`."
+          }
+        },
+
+        {
+          "name": "GET /dashboard/stats – Statistiques globales (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has total_tickets', () => pm.expect(json.total_tickets).to.be.a('number'));",
+                  "pm.test('Has tickets_by_status', () => pm.expect(json.tickets_by_status).to.exist);",
+                  "pm.test('Has performance_techniciens', () => pm.expect(json.performance_techniciens).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/dashboard/stats", "host": ["{{base_url}}"], "path": ["dashboard", "stats"] },
+            "description": "Retourne :\n- `total_tickets` : nombre total\n- `tickets_by_status` : comptage par statut (Nouveau / En cours / Résolu)\n- `performance_techniciens` : statistiques par technicien"
+          }
+        },
+
+        {
+          "name": "❌ GET /dashboard/stats – Refusé (Client)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "url": { "raw": "{{base_url}}/dashboard/stats", "host": ["{{base_url}}"], "path": ["dashboard", "stats"] }
+          }
+        },
+
+        {
+          "name": "❌ GET /techniciens – Non authentifié (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/techniciens", "host": ["{{base_url}}"], "path": ["techniciens"] },
+            "description": "Aucun token → 401 Unauthenticated."
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "⚡ Workflow Complet (Scénario E2E)",
+      "description": "Scénario de bout en bout pour tester le flux complet :\n1. Client crée un ticket\n2. Admin assigne un technicien\n3. Technicien soumet un rapport\n4. Client consulte le rapport\n\nExécuter ces requêtes **dans l'ordre** après avoir configuré les tokens.",
+      "item": [
+
+        {
+          "name": "Étape 1 – Client crée un ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Ticket créé (201)', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ticket_id', pm.response.json().data.id);",
+                  "console.log('✅ ticket_id =', pm.response.json().data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"[E2E] VPN impossible à connecter\",\n  \"description\": \"Depuis la mise à jour Windows du 12/06, le client VPN refuse toutes les connexions avec l'erreur code 800. Besoin d'une intervention urgente.\",\n  \"priorite\": \"Haute\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "Étape 2 – Admin assigne le technicien",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Assignation réussie (200)', () => pm.response.to.have.status(200));",
+                  "pm.test('Statut = En cours', () => pm.expect(pm.response.json().data.statut).to.eql('En cours'));",
+                  "console.log('✅ Technicien assigné');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicien_id\": {{technicien_id}}\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/assign", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "assign"] }
+          }
+        },
+
+        {
+          "name": "Étape 3 – Technicien soumet le rapport",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rapport créé (201)', () => pm.response.to.have.status(201));",
+                  "console.log('✅ Rapport soumis, ticket passé à Résolu');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "contenu",
+                  "value": "[E2E] Problème VPN résolu après désinstallation et réinstallation du client Cisco AnyConnect v4.10. Mise à jour du certificat d'authentification. Test de connexion validé depuis le poste du client.",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] }
+          }
+        },
+
+        {
+          "name": "Étape 4 – Client consulte le rapport final",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rapport accessible (200)', () => pm.response.to.have.status(200));",
+                  "pm.test('Contenu existe', () => pm.expect(pm.response.json().data.contenu).to.exist);",
+                  "console.log('✅ Workflow E2E complet !');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/rapport", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "rapport"] }
+          }
+        },
+
+        {
+          "name": "Étape 5 – Vérifier le statut final du ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticket statut = Résolu', () => pm.expect(pm.response.json().data.statut).to.eql('Résolu'));",
+                  "console.log('✅ Ticket confirmé Résolu');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔒 Sécurité & Validation",
+      "description": "Tests des règles de validation et des contrôles d'accès.",
+      "item": [
+
+        {
+          "name": "❌ Register – Champs manquants (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Has errors', () => pm.expect(pm.response.json().errors).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"incomplet@test.com\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          }
+        },
+
+        {
+          "name": "❌ Register – Rôle invalide (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Role error', () => pm.expect(pm.response.json().errors.role).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",       "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"Superuser\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          }
+        },
+
+        {
+          "name": "❌ POST /tickets – Titre manquant (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Titre error', () => pm.expect(pm.response.json().errors.titre).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_client}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Description sans titre.\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] }
+          }
+        },
+
+        {
+          "name": "❌ PATCH /status – Statut invalide (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Statut validation error', () => pm.expect(pm.response.json().errors.statut).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_tech}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"Fermé\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/tickets/{{ticket_id}}/status", "host": ["{{base_url}}"], "path": ["tickets", "{{ticket_id}}", "status"] },
+            "description": "`Fermé` n'est pas une valeur acceptée → 422."
+          }
+        },
+
+        {
+          "name": "❌ Accès sans token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/tickets", "host": ["{{base_url}}"], "path": ["tickets"] },
+            "description": "Sans header Authorization → 401 Unauthenticated."
+          }
+        }
+
+      ]
+    }
+
+  ]
+}
