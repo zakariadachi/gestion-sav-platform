@@ -1,0 +1,27 @@
+# Dependencies
+**/node_modules/
+**/vendor/
+node_modules/
+vendor/
+
+# Laravel
+gestion-sav-backend/.env
+gestion-sav-backend/storage/logs/*.log
+gestion-sav-backend/bootstrap/cache/*.php
+gestion-sav-backend/.phpunit.result.cache
+gestion-sav-backend/public/storage
+
+# Frontend build
+gestion-sav-frontend/dist/
+gestion-sav-frontend/.env
+
+# Scripts temporaires
+phase1.sh
+phase2.sh
+phase3.sh
+phase4.sh
+generate_history.sh
+
+# OS
+.DS_Store
+Thumbs.db
